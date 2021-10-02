@@ -17,6 +17,6 @@
 
 //! A library for parsing, serializing and creating json objects.
 
-
+/// Data-structures for different JSON components
 pub mod data_structures;
 
