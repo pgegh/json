@@ -27,7 +27,9 @@ impl Ws {
     /// assert_eq!(Err("The string contains illegal characters"), Ws::new(white_space));
     /// ```
     pub fn new(white_space: String) -> Result<Ws, &'static str> {
-        if white_space.as_bytes().iter()
+        if white_space.is_empty() {
+            Err("The string is empty")
+        } else if white_space.as_bytes().iter()
             .all(|x| *x == 0x20 || *x == 0x0A || *x == 0x0D || *x == 0x09) {
             Ok(Ws { value: white_space })
         } else {
