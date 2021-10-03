@@ -12,27 +12,29 @@ impl Ws {
     /// ```
     /// use json::data_structures::Ws;
     ///
-    /// let mut white_space = String::new();
-    /// white_space.push(0x0020 as char);
-    /// white_space.push(0x000A as char);
-    /// white_space.push(0x000D as char);
-    /// white_space.push(0x0009 as char);
+    /// let mut whitespace = String::new();
+    /// whitespace.push(0x0020 as char);
+    /// whitespace.push(0x000A as char);
+    /// whitespace.push(0x000D as char);
+    /// whitespace.push(0x0009 as char);
     ///
-    /// let ws = Ws::new(white_space.clone()).unwrap();
+    /// let ws = Ws::new(&whitespace).unwrap();
     ///
-    /// assert_eq!(white_space, ws.to_string());
+    /// assert_eq!(whitespace, ws.to_string());
     ///
     /// // Testing with an illegal string
-    /// white_space.push(0x000B as char);
+    /// whitespace.push(0x000B as char);
     ///
-    /// assert_eq!(Err("The string contains illegal characters"), Ws::new(white_space));
+    /// assert_eq!(Err("The string contains illegal characters"), Ws::new(&whitespace));
     /// ```
-    pub fn new(white_space: String) -> Result<Ws, &'static str> {
-        if white_space.is_empty() {
+    pub fn new(whitespace: &str) -> Result<Ws, &'static str> {
+        if whitespace.is_empty() {
             Err("The string is empty")
-        } else if white_space.as_bytes().iter()
-            .all(|x| *x == 0x20 || *x == 0x0A || *x == 0x0D || *x == 0x09) {
-            Ok(Ws { value: white_space })
+        } else if whitespace.chars().all(|x| x == 0x0020 as char
+            || x == 0x000A as char
+            || x == 0x000D as char
+            || x == 0x0009 as char) {
+            Ok(Ws { value: whitespace.to_string() })
         } else {
             Err("The string contains illegal characters")
         }
@@ -59,26 +61,26 @@ mod tests {
 
     #[test]
     fn test_empty_string() {
-        assert_eq!(Err("The string is empty"), Ws::new("".to_string()));
+        assert_eq!(Err("The string is empty"), Ws::new(""));
     }
 
     #[test]
-    fn test_illegal_string(){
+    fn test_illegal_string() {
         let mut whitespace = String::new();
         whitespace.push(0x20 as char);
         whitespace.push(0x0A as char);
         whitespace.push(0x0B as char);
-        assert_eq!(Err("The string contains illegal characters"), Ws::new(whitespace));
+        assert_eq!(Err("The string contains illegal characters"), Ws::new(&whitespace));
     }
 
     #[test]
-    fn test_legal_string(){
+    fn test_legal_string() {
         let mut whitespace = String::new();
         whitespace.push(0x20 as char);
         whitespace.push(0x0A as char);
         whitespace.push(0x0D as char);
         whitespace.push(0x09 as char);
-        let ws = Ws::new(whitespace.clone()).unwrap();
+        let ws = Ws::new(&whitespace).unwrap();
         assert_eq!(whitespace, ws.to_string());
     }
 }
