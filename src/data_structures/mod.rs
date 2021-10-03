@@ -15,7 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
-//! A library for parsing, serializing and creating json objects.
+mod j_string;
+mod ws;
 
-/// Data-structures for different JSON components
-pub mod data_structures;
+pub use j_string::JString;
+pub use ws::Ws;
