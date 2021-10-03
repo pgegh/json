@@ -1,3 +1,6 @@
+mod j_string;
+pub use j_string::JString;
+
 /// A data-structure that represents white space as defined in the ECMA-404 standard.
 /// The allowed characters are 0x20, 0x0A, 0x0D, 0x09.
 #[derive(Debug, Clone)]
