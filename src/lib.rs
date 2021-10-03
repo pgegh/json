@@ -19,4 +19,3 @@
 
 /// Data-structures for different JSON components
 pub mod data_structures;
-
