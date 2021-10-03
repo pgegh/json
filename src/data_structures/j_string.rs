@@ -15,8 +15,8 @@ impl JString {
     /// ```
     /// use json::data_structures::JString;
     ///
-    /// let s = JString::new("Hello world!").unwrap();
-    /// assert_eq!("Hello world!".to_string(), s.to_string());
+    /// let s = JString::new("🚗 this is a car!").unwrap();
+    /// assert_eq!("🚗 this is a car!".to_string(), s.to_string());
     ///
     /// // An illegal string
     /// let mut illegal_s = "Hello world".to_string();
@@ -45,5 +45,24 @@ impl Display for JString {
 impl PartialEq for JString {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::data_structures::JString;
+
+    #[test]
+    fn test_legal_string() {
+        let s = JString::new("🚗 this is a car!").unwrap();
+        assert_eq!("🚗 this is a car!".to_string(), s.to_string());
+    }
+
+    #[test]
+    fn test_illegal_string() {
+        let mut illegal_s = "Hello world".to_string();
+        illegal_s.push(0x0006 as char);
+        let error = "The string contains an illegal char (0x0006)".to_string();
+        assert_eq!(Err(error), JString::new(&illegal_s));
     }
 }
