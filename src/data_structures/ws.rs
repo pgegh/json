@@ -51,3 +51,34 @@ impl std::fmt::Display for Ws {
         write!(f, "{}", self.value)
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use crate::data_structures::Ws;
+
+    #[test]
+    fn test_empty_string() {
+        assert_eq!(Err("The string is empty"), Ws::new("".to_string()));
+    }
+
+    #[test]
+    fn test_illegal_string(){
+        let mut whitespace = String::new();
+        whitespace.push(0x20 as char);
+        whitespace.push(0x0A as char);
+        whitespace.push(0x0B as char);
+        assert_eq!(Err("The string contains illegal characters"), Ws::new(whitespace));
+    }
+
+    #[test]
+    fn test_legal_string(){
+        let mut whitespace = String::new();
+        whitespace.push(0x20 as char);
+        whitespace.push(0x0A as char);
+        whitespace.push(0x0D as char);
+        whitespace.push(0x09 as char);
+        let ws = Ws::new(whitespace.clone()).unwrap();
+        assert_eq!(whitespace, ws.to_string());
+    }
+}
