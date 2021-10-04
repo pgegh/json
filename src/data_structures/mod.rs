@@ -17,6 +17,8 @@
 
 mod j_string;
 mod ws;
+mod number;
 
 pub use j_string::JString;
 pub use ws::Ws;
+pub use number::Number;
