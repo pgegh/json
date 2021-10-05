@@ -75,7 +75,8 @@ impl FromStr for Number {
     /// let n = Number::from_str("2.5.000");
     /// assert_eq!(Err("An illegal point at index 3".to_string()), n);
     /// ```
-    /// High cyclomatic complexity! Optimization needed.
+    /// Todo: High cyclomatic complexity! Optimization needed.
+    /// Todo: The f64_value is not very accurate.
     fn from_str(s: &str) -> Result<Self, String> {
         let mut sign = Sign::None;
         let mut next_is_point = false;
@@ -96,11 +97,11 @@ impl FromStr for Number {
                 } else if (c as u32) > 0x0030 && (c as u32) < 0x003A {
                     temp_int.push(c);
                 } else {
-                    return Err(format!("Illegal first symbol {} at index {}", c, i));
+                    return Err(format!("Illegal symbol {} at index {}", c, i));
                 }
             } else if next_is_point {
                 if c != '.' {
-                    return Err(format!("Point was expected at index {}", i));
+                    return Err(format!("Illegal input! Point was expected at index {}", i));
                 } else {
                     next_is_point = false;
                     point = true;
@@ -131,6 +132,8 @@ impl FromStr for Number {
                         integer_part = temp_int.clone();
                     }
                     temp_int.clear();
+                } else {
+                    return Err(format!("Illegal symbol {} at index {}", c, i));
                 }
             } else if c == '+' || c == '-' {
                 if e_symbol != ' ' && temp_int.len() == 0 && e_sign == Sign::None {
@@ -200,4 +203,107 @@ pub enum Sign {
     None,
     Positive,
     Negative,
+}
+
+
+#[cfg(test)]
+mod test {
+    use std::str::FromStr;
+    use crate::data_structures::Number;
+
+    #[test]
+    fn test_zero() {
+        let n = Number::from_str("0").unwrap();
+        assert_eq!("0".to_string(), n.to_string());
+        assert_eq!(0_f64, n.get_f64_value());
+
+        let n = Number::from_str("-0").unwrap();
+        assert_eq!("-0".to_string(), n.to_string());
+        assert_eq!(-0_f64, n.get_f64_value());
+    }
+
+    #[test]
+    fn test_legal_negative_int() {
+        let n = Number::from_str("-300").unwrap();
+        assert_eq!("-300".to_string(), n.to_string());
+        assert_eq!(-300_f64, n.get_f64_value());
+    }
+
+    #[test]
+    fn test_legal_positive_int() {
+        let n = Number::from_str("5898499948554533445").unwrap();
+        assert_eq!("5898499948554533445".to_string(), n.to_string());
+        assert_eq!(5898499948554533445_f64, n.get_f64_value());
+    }
+
+    #[test]
+    fn test_legal_negative_decimal() {
+        let n = Number::from_str("-0.0016387").unwrap();
+        assert_eq!("-0.0016387".to_string(), n.to_string());
+        assert_eq!(-0.0016387_f64, n.get_f64_value());
+    }
+
+    #[test]
+    fn test_legal_positive_decimal() {
+        let n = Number::from_str("340.600").unwrap();
+        assert_eq!("340.600".to_string(), n.to_string());
+        assert_eq!(340.600_f64, n.get_f64_value());
+    }
+
+    #[test]
+    fn test_legal_negative_exponent() {
+        let n = Number::from_str("-0.0016387e7").unwrap();
+        assert_eq!("-0.0016387e7".to_string(), n.to_string());
+        assert_eq!(-0.0016387e7_f64, n.get_f64_value());
+
+        let n = Number::from_str("-0.0016387E-3").unwrap();
+        assert_eq!("-0.0016387E-3".to_string(), n.to_string());
+        assert_eq!(-0.0016387e-3_f64, n.get_f64_value());
+
+        let n = Number::from_str("-0.0016387E+3").unwrap();
+        assert_eq!("-0.0016387E+3".to_string(), n.to_string());
+        assert_eq!(-0.0016387e+3_f64, n.get_f64_value());
+    }
+
+    #[test]
+    fn test_legal_positive_exponent() {
+        let n = Number::from_str("340.6001e5").unwrap();
+        assert_eq!("340.6001e5".to_string(), n.to_string());
+        assert_eq!(340.6001e5_f64, n.get_f64_value());
+
+        let n = Number::from_str("340.6001E-5").unwrap();
+        assert_eq!("340.6001E-5".to_string(), n.to_string());
+        assert_eq!(340.6001e-5_f64, n.get_f64_value());
+
+        let n = Number::from_str("340.6001E+2").unwrap();
+        assert_eq!("340.6001E+2".to_string(), n.to_string());
+        assert_eq!(340.6001e+2_f64, n.get_f64_value());
+    }
+
+    #[test]
+    fn test_illegal_numbers(){
+        let n = Number::from_str("00");
+        assert_eq!(Err("Illegal input! Point was expected at index 1".to_string()), n);
+
+        let n = Number::from_str("+0");
+        assert_eq!(Err("Illegal symbol + at index 0".to_string()), n);
+
+        let n = Number::from_str(".30");
+        assert_eq!(Err("Illegal symbol . at index 0".to_string()), n);
+
+        let n = Number::from_str("1.3.0");
+        assert_eq!(Err("An illegal point at index 3".to_string()), n);
+
+        let n = Number::from_str("1-30");
+        assert_eq!(Err("An illegal sign at index 1".to_string()), n);
+
+        let n = Number::from_str("-13e2.3");
+        assert_eq!(Err("An illegal point at index 5".to_string()), n);
+
+        let n = Number::from_str("13e2e3");
+        assert_eq!(Err("Illegal symbol e at index 4".to_string()), n);
+
+        let n = Number::from_str("-1123.35E2E3");
+        assert_eq!(Err("Illegal symbol E at index 10".to_string()), n);
+    }
 }
