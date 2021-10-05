@@ -75,8 +75,9 @@ impl FromStr for Number {
     /// let n = Number::from_str("2.5.000");
     /// assert_eq!(Err("An illegal point at index 3".to_string()), n);
     /// ```
-    /// Todo: High cyclomatic complexity! Optimization needed.
-    /// Todo: The f64_value is not very accurate.
+    // Todo: High cyclomatic complexity! Optimization needed.
+    // Todo: The f64_value is not very accurate.
+    // Todo: consider implementing from_str() locally i.e. without implementing the trait std::str::FromStr
     fn from_str(s: &str) -> Result<Self, String> {
         let mut sign = Sign::None;
         let mut next_is_point = false;
@@ -281,7 +282,7 @@ mod test {
     }
 
     #[test]
-    fn test_illegal_numbers(){
+    fn test_illegal_numbers() {
         let n = Number::from_str("00");
         assert_eq!(Err("Illegal input! Point was expected at index 1".to_string()), n);
 
