@@ -34,6 +34,7 @@ use crate::data_structures::{JString, Number};
 /// ```
 #[derive(Debug, Clone)]
 pub enum JValue {
+    Array(Vec<JValue>),
     JString(JString),
     Number(Number),
     Boolean(bool),
@@ -43,6 +44,7 @@ pub enum JValue {
 impl Display for JValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
+            JValue::Array(a) => write!(f, "{}", array_to_string(a)),
             JValue::JString(s) => write!(f, "{}", s),
             JValue::Number(n) => write!(f, "{}", n),
             JValue::Boolean(b) => write!(f, "{}", b),
@@ -54,6 +56,7 @@ impl Display for JValue {
 impl PartialEq for JValue {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
+            (JValue::Array(a1), JValue::Array(a2)) => a1 == a2,
             (JValue::JString(s1), JValue::JString(s2)) => s1 == s2,
             (JValue::Number(n1), JValue::Number(n2)) => n1 == n2,
             (JValue::Boolean(b1), JValue::Boolean(b2)) => b1 == b2,
@@ -63,10 +66,40 @@ impl PartialEq for JValue {
     }
 }
 
+fn array_to_string(array: &Vec<JValue>) -> String {
+    let mut result = String::new();
+    result.push('[');
+    for (i, v) in array.iter().enumerate() {
+        match v {
+            JValue::JString(_) => {
+                result.push('"');
+                result.push_str(&v.to_string());
+                result.push('"');
+            }
+            _ => result.push_str(&v.to_string())
+        }
+        if i < array.len() - 1 {
+            result.push_str(", ")
+        }
+    }
+    result.push(']');
+    result
+}
+
 #[cfg(test)]
 mod test {
     use std::str::FromStr;
     use crate::data_structures::{JString, JValue, Number};
+
+    #[test]
+    fn test_valid_array() {
+        let a1: JValue = JValue::Array(vec![JValue::Boolean(true),
+                                            JValue::JString(JString::new("123").unwrap()),
+                                            JValue::Number(Number::from_str("3.4e-3").unwrap())]);
+        assert_eq!("[true, \"123\", 3.4e-3]".to_string(), a1.to_string());
+        let a2: JValue = JValue::Array(vec![JValue::Boolean(true)]);
+        assert_ne!(a1, a2);
+    }
 
     #[test]
     fn test_valid_j_string() {
