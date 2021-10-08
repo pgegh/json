@@ -17,10 +17,10 @@
 
 mod j_string;
 mod ws;
-mod number;
+mod j_number;
 mod j_value;
 
 pub use j_string::JString;
 pub use ws::Ws;
-pub use number::Number;
+pub use j_number::JNumber;
 pub use j_value::JValue;

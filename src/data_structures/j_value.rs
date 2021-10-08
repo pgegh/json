@@ -16,7 +16,7 @@
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::fmt::{Display, Formatter};
-use crate::data_structures::{JString, Number};
+use crate::data_structures::{JString, JNumber};
 
 /// A value can be a string, or a number, or true or false or null, or an
 /// object or an array.
@@ -36,7 +36,7 @@ use crate::data_structures::{JString, Number};
 pub enum JValue {
     Array(Vec<JValue>),
     JString(JString),
-    Number(Number),
+    Number(JNumber),
     Boolean(bool),
     Null,
 }
@@ -89,13 +89,13 @@ fn array_to_string(array: &Vec<JValue>) -> String {
 #[cfg(test)]
 mod test {
     use std::str::FromStr;
-    use crate::data_structures::{JString, JValue, Number};
+    use crate::data_structures::{JString, JValue, JNumber};
 
     #[test]
     fn test_valid_array() {
         let a1: JValue = JValue::Array(vec![JValue::Boolean(true),
                                             JValue::JString(JString::new("123").unwrap()),
-                                            JValue::Number(Number::from_str("3.4e-3").unwrap())]);
+                                            JValue::Number(JNumber::from_str("3.4e-3").unwrap())]);
         assert_eq!("[true, \"123\", 3.4e-3]".to_string(), a1.to_string());
         let a2: JValue = JValue::Array(vec![JValue::Boolean(true)]);
         assert_ne!(a1, a2);
@@ -111,9 +111,9 @@ mod test {
 
     #[test]
     fn test_valid_number() {
-        let n1 = JValue::Number(Number::from_str("90.010").unwrap());
+        let n1 = JValue::Number(JNumber::from_str("90.010").unwrap());
         assert_eq!("90.010".to_string(), n1.to_string());
-        let n2 = JValue::Number(Number::from_str("90.010").unwrap());
+        let n2 = JValue::Number(JNumber::from_str("90.010").unwrap());
         assert_eq!(n1, n2);
     }
 
