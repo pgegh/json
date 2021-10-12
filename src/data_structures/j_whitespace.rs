@@ -19,15 +19,15 @@
 /// the following code points: character tabulation (U+0009), line feed (U+000A), carriage return
 /// (U+000D), and space (U+0020).
 #[derive(Debug, Clone)]
-pub struct Ws {
+pub struct JWhitespace {
     value: String,
 }
 
-impl Ws {
+impl JWhitespace {
     /// Creates a new Ws struct that contains only 0x20, 0x0A, 0x0D, and 0x09 characters.
     ///
     /// ```
-    /// use json::data_structures::Ws;
+    /// use json::data_structures::JWhitespace;
     ///
     /// let mut whitespace = String::new();
     /// whitespace.push(0x0020 as char);
@@ -35,37 +35,37 @@ impl Ws {
     /// whitespace.push(0x000D as char);
     /// whitespace.push(0x0009 as char);
     ///
-    /// let ws = Ws::new(&whitespace).unwrap();
+    /// let ws = JWhitespace::new(&whitespace).unwrap();
     ///
     /// assert_eq!(whitespace, ws.to_string());
     ///
     /// // Testing with an illegal string
     /// whitespace.push(0x000B as char);
     ///
-    /// assert_eq!(Err("The string contains illegal characters"), Ws::new(&whitespace));
+    /// assert_eq!(Err("The string contains illegal characters"), JWhitespace::new(&whitespace));
     /// ```
-    pub fn new(whitespace: &str) -> Result<Ws, &'static str> {
+    pub fn new(whitespace: &str) -> Result<JWhitespace, &'static str> {
         if whitespace.is_empty() {
             Err("The string is empty")
         } else if whitespace.chars().all(|x| x == 0x0020 as char
             || x == 0x000A as char
             || x == 0x000D as char
             || x == 0x0009 as char) {
-            Ok(Ws { value: whitespace.to_string() })
+            Ok(JWhitespace { value: whitespace.to_string() })
         } else {
             Err("The string contains illegal characters")
         }
     }
 }
 
-impl PartialEq for Ws {
+impl PartialEq for JWhitespace {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
     }
 }
 
 /// Implements formatting
-impl std::fmt::Display for Ws {
+impl std::fmt::Display for JWhitespace {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
     }
@@ -74,11 +74,11 @@ impl std::fmt::Display for Ws {
 
 #[cfg(test)]
 mod tests {
-    use crate::data_structures::Ws;
+    use crate::data_structures::JWhitespace;
 
     #[test]
     fn test_empty_string() {
-        assert_eq!(Err("The string is empty"), Ws::new(""));
+        assert_eq!(Err("The string is empty"), JWhitespace::new(""));
     }
 
     #[test]
@@ -87,7 +87,7 @@ mod tests {
         whitespace.push(0x20 as char);
         whitespace.push(0x0A as char);
         whitespace.push(0x0B as char);
-        assert_eq!(Err("The string contains illegal characters"), Ws::new(&whitespace));
+        assert_eq!(Err("The string contains illegal characters"), JWhitespace::new(&whitespace));
     }
 
     #[test]
@@ -97,7 +97,7 @@ mod tests {
         whitespace.push(0x0A as char);
         whitespace.push(0x0D as char);
         whitespace.push(0x09 as char);
-        let ws = Ws::new(&whitespace).unwrap();
+        let ws = JWhitespace::new(&whitespace).unwrap();
         assert_eq!(whitespace, ws.to_string());
     }
 }

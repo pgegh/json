@@ -16,11 +16,11 @@
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
 mod j_string;
-mod ws;
+mod j_whitespace;
 mod j_number;
 mod j_value;
 
 pub use j_string::JString;
-pub use ws::Ws;
+pub use j_whitespace::JWhitespace;
 pub use j_number::JNumber;
 pub use j_value::JValue;
