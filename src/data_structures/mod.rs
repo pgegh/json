@@ -19,8 +19,10 @@ mod j_string;
 mod j_whitespace;
 mod j_number;
 mod j_value;
+mod j_object;
 
 pub use j_string::JString;
 pub use j_whitespace::JWhitespace;
 pub use j_number::JNumber;
 pub use j_value::JValue;
+pub use j_object::JObject;
