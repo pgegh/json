@@ -24,7 +24,7 @@ use crate::data_structures::JValue;
 /// Each name is followed by ':' colon and the name/value pairs are separated by ',' comma.
 #[derive(Debug, Clone)]
 pub struct JObject {
-    value: HashMap<&str, JValue>,
+    value: HashMap<String, JValue>,
     size: usize,
 }
 
@@ -73,7 +73,7 @@ impl JObject {
     /// assert_eq!("{key : true,}".to_string(), obj.to_string());
     /// assert_eq!(1, obj.len());
     /// ```
-    pub fn insert(&mut self, k: &str, v: JValue) -> Option<JValue> {
+    pub fn insert(&mut self, k: String, v: JValue) -> Option<JValue> {
         match self.value.insert(k, v) {
             Some(old_v) => Some(old_v),
             None => {
@@ -149,6 +149,12 @@ impl Display for JObject {
     }
 }
 
+impl PartialEq for JObject {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::data_structures::{JObject, JValue};
@@ -167,5 +173,58 @@ mod test {
         assert_eq!("{key1 : true,}".to_string(), obj.to_string());
         assert_eq!(1, obj.len());
         obj.insert("key2".to_string(), JValue::Null);
+        assert_eq!(2, obj.len());
+    }
+
+    #[test]
+    fn test_remove() {
+        let mut obj = JObject::new();
+        assert_eq!(0, obj.len());
+        assert_eq!(None, obj.remove("key1"));
+        obj.insert("key1".to_string(), JValue::Boolean(true));
+        obj.insert("key2".to_string(), JValue::Null);
+        assert_eq!(2, obj.len());
+        assert_eq!(JValue::Boolean(true), obj.remove("key1").unwrap());
+        assert_eq!(JValue::Null, obj.remove("key2").unwrap());
+        assert_eq!(0, obj.len());
+    }
+
+    #[test]
+    fn test_get() {
+        let mut obj = JObject::new();
+        obj.insert("key1".to_string(), JValue::Boolean(true));
+        assert_eq!(JValue::Boolean(true), *obj.get("key1").unwrap());
+        assert_eq!(None, obj.get("key2"));
+    }
+
+    #[test]
+    fn test_get_mut() {
+        let mut obj = JObject::new();
+        obj.insert("key1".to_string(), JValue::Boolean(true));
+        assert_eq!(JValue::Boolean(true), *obj.get("key1").unwrap());
+        assert_eq!(None, obj.get_mut("key2"));
+        *obj.get_mut("key1").unwrap() = JValue::Null;
+        assert_eq!(JValue::Null, *obj.get("key1").unwrap());
+    }
+
+    #[test]
+    fn test_eq() {
+        let mut obj1 = JObject::new();
+        let mut obj2 = JObject::new();
+        let mut obj3 = JObject::new();
+        let mut obj4 = JObject::new();
+        assert_eq!(obj1, obj2);
+        obj1.insert("key1".to_string(), JValue::Boolean(true));
+        obj1.insert("key2".to_string(), JValue::Null);
+        assert_ne!(obj1, obj2);
+        obj2.insert("key1".to_string(), JValue::Boolean(true));
+        obj2.insert("key2".to_string(), JValue::Null);
+        assert_eq!(obj1, obj2);
+        obj3.insert("key2".to_string(), JValue::Null);
+        obj3.insert("key1".to_string(), JValue::Boolean(true));
+        assert_eq!(obj1, obj3);
+        obj4.insert("key1".to_string(), JValue::Boolean(false));
+        obj4.insert("key2".to_string(), JValue::Null);
+        assert_ne!(obj1, obj4);
     }
 }
