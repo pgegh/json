@@ -16,7 +16,7 @@
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::fmt::{Display, Formatter};
-use crate::data_structures::{JString, JNumber};
+use crate::data_structures::{JString, JNumber, JObject};
 
 /// A value can be a string, or a number, or true or false or null, or an
 /// object or an array.
@@ -34,6 +34,7 @@ use crate::data_structures::{JString, JNumber};
 /// ```
 #[derive(Debug, Clone)]
 pub enum JValue {
+    Object(JObject),
     Array(Vec<JValue>),
     JString(JString),
     Number(JNumber),
@@ -44,6 +45,7 @@ pub enum JValue {
 impl Display for JValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
+            JValue::Object(o) => write!(f, "{}", o),
             JValue::Array(a) => write!(f, "{}", array_to_string(a)),
             JValue::JString(s) => write!(f, "{}", s),
             JValue::Number(n) => write!(f, "{}", n),
@@ -56,6 +58,7 @@ impl Display for JValue {
 impl PartialEq for JValue {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
+            (JValue::Object(o1), JValue::Object(o2)) => o1 == o2,
             (JValue::Array(a1), JValue::Array(a2)) => a1 == a2,
             (JValue::JString(s1), JValue::JString(s2)) => s1 == s2,
             (JValue::Number(n1), JValue::Number(n2)) => n1 == n2,
@@ -89,7 +92,20 @@ fn array_to_string(array: &Vec<JValue>) -> String {
 #[cfg(test)]
 mod test {
     use std::str::FromStr;
-    use crate::data_structures::{JString, JValue, JNumber};
+    use crate::data_structures::{JString, JValue, JNumber, JObject};
+
+    #[test]
+    fn test_valid_object() {
+        let o1: JValue = JValue::Object(JObject::new());
+        assert_eq!("{}".to_string(), o1.to_string());
+        let o2: JValue = JValue::Object(JObject::new());
+        assert_eq!(o1, o2);
+        let mut obj = JObject::new();
+        obj.insert("key1".to_string(), JValue::Null);
+        let o3: JValue = JValue::Object(obj);
+        assert_eq!("{key1 : null,}".to_string(), o3.to_string() );
+        assert_ne!(o1, o3);
+    }
 
     #[test]
     fn test_valid_array() {
