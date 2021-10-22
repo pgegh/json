@@ -16,6 +16,7 @@
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::fmt::{Display, Formatter};
+use crate::data_structures::Serialize;
 
 /// A string is a sequence of Unicode code points wrapped with quotation marks (U+0022). All code
 /// points may be placed within the quotation marks except for the code points that must be
@@ -59,6 +60,44 @@ impl Display for JString {
     }
 }
 
+impl Serialize for JString {
+    fn serialize(&self) -> String {
+        let mut s = String::new();
+        s.push('\"');
+        for c in self.value.chars() {
+            if c == 0x000A as char {
+                s.push('\\');
+                s.push('n');
+            } else if c == 0x0009 as char {
+                s.push('\\');
+                s.push('t');
+            } else if c == 0x0022 as char {
+                s.push('\\');
+                s.push('\"');
+            } else if c == 0x005C as char {
+                s.push('\\');
+                s.push('\\');
+            } else if c == 0x002F as char {
+                s.push('\\');
+                s.push('/');
+            } else if c == 0x0008 as char {
+                s.push('\\');
+                s.push('b');
+            } else if c == 0x000C as char {
+                s.push('\\');
+                s.push('f');
+            } else if c == 0x000D as char {
+                s.push('\\');
+                s.push('r');
+            } else {
+                s.push(c);
+            }
+        }
+        s.push('\"');
+        s
+    }
+}
+
 impl PartialEq for JString {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
@@ -67,7 +106,7 @@ impl PartialEq for JString {
 
 #[cfg(test)]
 mod test {
-    use crate::data_structures::JString;
+    use crate::data_structures::{JString, Serialize};
 
     #[test]
     fn test_legal_string() {
@@ -81,5 +120,34 @@ mod test {
         illegal_s.push(0x0006 as char);
         let error = "The string contains an illegal char (0x0006)".to_string();
         assert_eq!(Err(error), JString::new(&illegal_s));
+    }
+
+    #[test]
+    fn test_serialization() {
+        let mut n = JString::new("🚗 this is a car!").unwrap();
+        assert_eq!("\"🚗 this is a car!\"".to_string(), n.serialize());
+
+        let mut s = String::new();
+        s.push_str("Hello world ");
+        s.push(0x0022 as char);
+        s.push_str("quotation ");
+        s.push(0x005C as char);
+        s.push_str("back-slash ");
+        s.push(0x002F as char);
+        s.push_str("slash ");
+        s.push(0x0008 as char);
+        s.push_str("backspace ");
+        s.push(0x000C as char);
+        s.push_str("form-feed ");
+        s.push(0x000A as char);
+        s.push_str("line-feed ");
+        s.push(0x000D as char);
+        s.push_str("carriage-return ");
+        s.push(0x0009 as char);
+        s.push_str("tab.");
+
+        n = JString::new(&s).unwrap();
+        assert_eq!("\"Hello world \\\"quotation \\\\back-slash \\/slash \\bback\
+        space \\fform-feed \\nline-feed \\rcarriage-return \\ttab.\"".to_string(), n.serialize());
     }
 }

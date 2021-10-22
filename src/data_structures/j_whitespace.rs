@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::data_structures::Serialize;
+
 /// A data-structure that represents whitespace. Whitespace is any sequence of one or more of
 /// the following code points: character tabulation (U+0009), line feed (U+000A), carriage return
 /// (U+000D), and space (U+0020).
@@ -71,10 +73,15 @@ impl std::fmt::Display for JWhitespace {
     }
 }
 
+impl Serialize for JWhitespace {
+    fn serialize(&self) -> String {
+        " ".to_string()
+    }
+}
 
 #[cfg(test)]
 mod tests {
-    use crate::data_structures::JWhitespace;
+    use crate::data_structures::{JWhitespace, Serialize};
 
     #[test]
     fn test_empty_string() {
@@ -99,5 +106,14 @@ mod tests {
         whitespace.push(0x09 as char);
         let ws = JWhitespace::new(&whitespace).unwrap();
         assert_eq!(whitespace, ws.to_string());
+    }
+
+    #[test]
+    fn test_serialization(){
+        let mut ws = JWhitespace::new(" ").unwrap();
+        assert_eq!(" ".to_string(), ws.serialize());
+
+        ws = JWhitespace::new("  \n  \t ").unwrap();
+        assert_eq!(" ".to_string(), ws.serialize());
     }
 }

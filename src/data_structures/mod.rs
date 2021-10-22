@@ -26,3 +26,10 @@ pub use j_whitespace::JWhitespace;
 pub use j_number::JNumber;
 pub use j_value::JValue;
 pub use j_object::JObject;
+
+
+trait Serialize {
+    /// Creates a serialization of the data-structure as a JSON string with minimal or
+    /// no whitespace characters.
+    fn serialize(&self) -> String;
+}
