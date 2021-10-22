@@ -17,6 +17,7 @@
 
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
+use crate::data_structures::Serialize;
 
 /// A number is a sequence of decimal digits with no superfluous leading zero. It may have a
 /// preceding minus sign (U+002D). It may have a fractional part prefixed by a decimal
@@ -178,6 +179,12 @@ impl PartialEq for JNumber {
     }
 }
 
+impl Serialize for JNumber {
+    fn serialize(&self) -> String {
+        self.to_string()
+    }
+}
+
 fn get_f64(sign: &Sign,
            integer_part: &str,
            fractional_part: &str,
@@ -210,7 +217,7 @@ pub enum Sign {
 #[cfg(test)]
 mod test {
     use std::str::FromStr;
-    use crate::data_structures::JNumber;
+    use crate::data_structures::{JNumber, Serialize};
 
     #[test]
     fn test_zero() {
@@ -307,4 +314,14 @@ mod test {
         let n = JNumber::from_str("-1123.35E2E3");
         assert_eq!(Err("Illegal symbol E at index 10".to_string()), n);
     }
+
+    #[test]
+    fn test_serialise() {
+        let mut n = JNumber::from_str("2.34e-10").unwrap();
+        assert_eq!("2.34e-10".to_string(), n.serialize());
+
+        n = JNumber::from_str("2.34E10").unwrap();
+        assert_eq!("2.34E10".to_string(), n.serialize());
+    }
+
 }

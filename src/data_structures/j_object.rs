@@ -17,7 +17,7 @@
 
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
-use crate::data_structures::JValue;
+use crate::data_structures::{JValue, Serialize};
 
 /// An object is an unordered set of name/value pairs.
 /// An object begins with '{' left brace and ends with '}' right brace.
@@ -155,9 +155,29 @@ impl PartialEq for JObject {
     }
 }
 
+impl Serialize for JObject {
+    fn serialize(&self) -> String {
+        let mut result = String::new();
+        result.push('{');
+        for (i, (s, v)) in self.value.iter().enumerate() {
+            result.push('\"');
+            result.push_str(&s);
+            result.push('\"');
+            result.push_str(":");
+            result.push_str(&v.serialize());
+            if i < self.size - 1 {
+                result.push_str(",");
+            }
+        }
+        result.push('}');
+        result
+    }
+}
+
+
 #[cfg(test)]
 mod test {
-    use crate::data_structures::{JObject, JValue};
+    use crate::data_structures::{JObject, JValue, Serialize};
 
     #[test]
     fn test_empty_object() {
@@ -226,5 +246,15 @@ mod test {
         obj4.insert("key1".to_string(), JValue::Boolean(false));
         obj4.insert("key2".to_string(), JValue::Null);
         assert_ne!(obj1, obj4);
+    }
+
+    #[test]
+    fn test_serialization() {
+        let mut obj = JObject::new();
+        assert_eq!("{}".to_string(), obj.serialize());
+        obj.insert("key1".to_string(), JValue::Boolean(true));
+        obj.insert("key2".to_string(), JValue::Boolean(false));
+        assert!("{\"key1\":true,\"key2\":false}".to_string() == obj.serialize()
+            || "{\"key2\":false,\"key1\":true}".to_string() == obj.serialize());
     }
 }

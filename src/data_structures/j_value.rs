@@ -16,7 +16,7 @@
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::fmt::{Display, Formatter};
-use crate::data_structures::{JString, JNumber, JObject};
+use crate::data_structures::{JString, JNumber, JObject, Serialize};
 
 /// A value can be a string, or a number, or true or false or null, or an
 /// object or an array.
@@ -46,7 +46,7 @@ impl Display for JValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             JValue::Object(o) => write!(f, "{}", o),
-            JValue::Array(a) => write!(f, "{}", array_to_string(a)),
+            JValue::Array(a) => write!(f, "{}", array_to_string(a, false)),
             JValue::String(s) => write!(f, "{}", s),
             JValue::Number(n) => write!(f, "{}", n),
             JValue::Boolean(b) => write!(f, "{}", b),
@@ -69,20 +69,44 @@ impl PartialEq for JValue {
     }
 }
 
-fn array_to_string(array: &Vec<JValue>) -> String {
+impl Serialize for JValue {
+    fn serialize(&self) -> String {
+        let mut result = String::new();
+        let s = match self {
+            JValue::Object(o) => o.serialize(),
+            JValue::Array(a) => array_to_string(a, true),
+            JValue::String(s) => s.serialize(),
+            JValue::Number(n) => n.serialize(),
+            JValue::Boolean(b) => format!("{}", b),
+            JValue::Null => "null".to_string()
+        };
+        result.push_str(&s);
+        result
+    }
+}
+
+fn array_to_string(array: &Vec<JValue>, serialize: bool) -> String {
     let mut result = String::new();
     result.push('[');
     for (i, v) in array.iter().enumerate() {
-        match v {
-            JValue::String(_) => {
-                result.push('"');
-                result.push_str(&v.to_string());
-                result.push('"');
+        if serialize {
+            result.push_str(&v.serialize());
+        } else {
+            match v {
+                JValue::String(_) => {
+                    result.push('"');
+                    result.push_str(&v.to_string());
+                    result.push('"');
+                }
+                _ => result.push_str(&v.to_string())
             }
-            _ => result.push_str(&v.to_string())
         }
         if i < array.len() - 1 {
-            result.push_str(", ")
+            if serialize {
+                result.push_str(",")
+            } else {
+                result.push_str(", ")
+            }
         }
     }
     result.push(']');
@@ -92,7 +116,7 @@ fn array_to_string(array: &Vec<JValue>) -> String {
 #[cfg(test)]
 mod test {
     use std::str::FromStr;
-    use crate::data_structures::{JString, JValue, JNumber, JObject};
+    use crate::data_structures::{JString, JValue, JNumber, JObject, Serialize};
 
     #[test]
     fn test_valid_object() {
@@ -103,7 +127,7 @@ mod test {
         let mut obj = JObject::new();
         obj.insert("key1".to_string(), JValue::Null);
         let o3: JValue = JValue::Object(obj);
-        assert_eq!("{key1 : null,}".to_string(), o3.to_string() );
+        assert_eq!("{key1 : null,}".to_string(), o3.to_string());
         assert_ne!(o1, o3);
     }
 
@@ -151,5 +175,39 @@ mod test {
         let x2 = JValue::Null;
         assert_eq!("null".to_string(), x2.to_string());
         assert_eq!(x1, x2);
+    }
+
+    #[test]
+    fn test_serialization() {
+        let mut v = JValue::Null;
+        assert_eq!("null".to_string(), v.serialize());
+
+        v = JValue::Boolean(true);
+        assert_eq!("true".to_string(), v.serialize());
+
+        v = JValue::Boolean(false);
+        assert_eq!("false".to_string(), v.serialize());
+
+        v = JValue::Array(vec![]);
+        assert_eq!("[]".to_string(), v.serialize());
+
+        v = JValue::Array(vec![JValue::Boolean(true), JValue::Null]);
+        assert_eq!("[true,null]".to_string(), v.serialize());
+
+        v = JValue::Object(JObject::new());
+        assert_eq!("{}".to_string(), v.serialize());
+
+        let mut obj = JObject::new();
+        obj.insert("key1".to_string(), JValue::Null);
+        obj.insert("key2".to_string(), JValue::Boolean(false));
+        v = JValue::Object(obj);
+        assert!("{\"key1\":null,\"key2\":false}".to_string() == v.serialize()
+            || "{\"key2\":false,\"key1\":null}".to_string() == v.serialize());
+
+        v = JValue::Number(JNumber::from_str("355.3").unwrap());
+        assert_eq!("355.3".to_string(), v.serialize());
+
+        v = JValue::String(JString::new("hello").unwrap());
+        assert_eq!("\"hello\"".to_string(), v.serialize());
     }
 }
