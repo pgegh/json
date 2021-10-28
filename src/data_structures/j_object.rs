@@ -17,14 +17,14 @@
 
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
-use crate::data_structures::{JValue, Serialize};
+use crate::data_structures::{JString, JValue, Serialize};
 
 /// An object is an unordered set of name/value pairs.
 /// An object begins with '{' left brace and ends with '}' right brace.
 /// Each name is followed by ':' colon and the name/value pairs are separated by ',' comma.
 #[derive(Debug, Clone)]
 pub struct JObject {
-    value: HashMap<String, JValue>,
+    value: HashMap<JString, JValue>,
     size: usize,
 }
 
@@ -47,10 +47,10 @@ impl JObject {
     /// Returns the number of elements in the JObject
     ///
     /// ```
-    /// use json::data_structures::{JObject, JValue};
+    /// use json::data_structures::{JObject, JString, JValue};
     ///
     /// let mut obj = JObject::new();
-    /// obj.insert("key".to_string(), JValue::Boolean(true));
+    /// obj.insert(JString::new("key").unwrap(), JValue::Boolean(true));
     /// assert_eq!("{key : true,}".to_string(), obj.to_string());
     /// ```
     pub fn len(&self) -> usize {
@@ -65,15 +65,15 @@ impl JObject {
     /// value is returned.
     ///
     /// ```
-    /// use json::data_structures::{JObject, JValue};
+    /// use json::data_structures::{JObject, JString, JValue};
     ///
     /// let mut obj = JObject::new();
     /// assert_eq!(0, obj.len());
-    /// obj.insert("key".to_string(), JValue::Boolean(true));
+    /// obj.insert(JString::new("key").unwrap(), JValue::Boolean(true));
     /// assert_eq!("{key : true,}".to_string(), obj.to_string());
     /// assert_eq!(1, obj.len());
     /// ```
-    pub fn insert(&mut self, k: String, v: JValue) -> Option<JValue> {
+    pub fn insert(&mut self, k: JString, v: JValue) -> Option<JValue> {
         match self.value.insert(k, v) {
             Some(old_v) => Some(old_v),
             None => {
@@ -87,16 +87,18 @@ impl JObject {
     /// was previously in the object. Otherwise will return [`None`].
     ///
     /// ```
-    /// use json::data_structures::{JObject, JValue};
+    /// use json::data_structures::{JObject, JString, JValue};
     ///
     /// let mut obj = JObject::new();
-    /// obj.insert("key".to_string(), JValue::Boolean(false));
+    /// let s = JString::new("key").unwrap();
+    /// obj.insert(s.clone(), JValue::Boolean(false));
     /// assert_eq!(1, obj.len());
-    /// obj.remove("key");
+    ///
+    /// obj.remove(&s);
     /// assert_eq!(0, obj.len());
-    /// assert_eq!(None, obj.remove("key"));
+    /// assert_eq!(None, obj.remove(&s));
     /// ```
-    pub fn remove(&mut self, k: &str) -> Option<JValue> {
+    pub fn remove(&mut self, k: &JString) -> Option<JValue> {
         match self.value.remove(k) {
             Some(v) => {
                 self.size -= 1;
@@ -109,13 +111,14 @@ impl JObject {
     /// Gets a reference to the value if the key exists in the object. Otherwise returns [`None`].
     ///
     /// ```
-    /// use json::data_structures::{JObject, JValue};
+    /// use json::data_structures::{JObject, JString, JValue};
     ///
     /// let mut obj = JObject::new();
-    /// obj.insert("key".to_string(), JValue::Boolean(false));
-    /// assert_eq!("false".to_string(), obj.get("key").unwrap().to_string());
+    /// let s = JString::new("key").unwrap();
+    /// obj.insert(s.clone(), JValue::Boolean(false));
+    /// assert_eq!("false".to_string(), obj.get(&s).unwrap().to_string());
     /// ```
-    pub fn get(&self, k: &str) -> Option<&JValue> {
+    pub fn get(&self, k: &JString) -> Option<&JValue> {
         self.value.get(k)
     }
 
@@ -123,14 +126,15 @@ impl JObject {
     /// Otherwise returns [`None`].
     ///
     /// ```
-    /// use json::data_structures::{JObject, JValue};
+    /// use json::data_structures::{JObject, JString, JValue};
     ///
     /// let mut obj = JObject::new();
-    /// obj.insert("key".to_string(), JValue::Boolean(false));
-    /// *obj.get_mut("key").unwrap() = JValue::Boolean(true);
-    /// assert_eq!("true".to_string(), obj.get("key").unwrap().to_string());
+    /// let s = JString::new("key").unwrap();
+    /// obj.insert(s.clone(), JValue::Boolean(false));
+    /// *obj.get_mut(&s).unwrap() = JValue::Boolean(true);
+    /// assert_eq!("true".to_string(), obj.get(&s).unwrap().to_string());
     /// ```
-    pub fn get_mut(&mut self, k: &str) -> Option<&mut JValue> {
+    pub fn get_mut(&mut self, k: &JString) -> Option<&mut JValue> {
         self.value.get_mut(k)
     }
 }
@@ -140,7 +144,7 @@ impl Display for JObject {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut result = String::new();
         for (s, v) in &self.value {
-            result.push_str(&s);
+            result.push_str(&s.to_string());
             result.push_str(" : ");
             result.push_str(&format!("{}", v));
             result.push_str(",");
@@ -160,9 +164,7 @@ impl Serialize for JObject {
         let mut result = String::new();
         result.push('{');
         for (i, (s, v)) in self.value.iter().enumerate() {
-            result.push('\"');
-            result.push_str(&s);
-            result.push('\"');
+            result.push_str(&s.serialize());
             result.push_str(":");
             result.push_str(&v.serialize());
             if i < self.size - 1 {
@@ -177,7 +179,7 @@ impl Serialize for JObject {
 
 #[cfg(test)]
 mod test {
-    use crate::data_structures::{JObject, JValue, Serialize};
+    use crate::data_structures::{JObject, JString, JValue, Serialize};
 
     #[test]
     fn test_empty_object() {
@@ -188,43 +190,51 @@ mod test {
     #[test]
     fn test_inserting() {
         let mut obj = JObject::new();
+        let k1= JString::new("key1").unwrap();
+        let k2= JString::new("key2").unwrap();
         assert_eq!(0, obj.len());
-        obj.insert("key1".to_string(), JValue::Boolean(true));
+        obj.insert(k1.clone(), JValue::Boolean(true));
         assert_eq!("{key1 : true,}".to_string(), obj.to_string());
         assert_eq!(1, obj.len());
-        obj.insert("key2".to_string(), JValue::Null);
+        obj.insert(k2.clone(), JValue::Null);
         assert_eq!(2, obj.len());
     }
 
     #[test]
     fn test_remove() {
         let mut obj = JObject::new();
+        let k1= JString::new("key1").unwrap();
+        let k2= JString::new("key2").unwrap();
         assert_eq!(0, obj.len());
-        assert_eq!(None, obj.remove("key1"));
-        obj.insert("key1".to_string(), JValue::Boolean(true));
-        obj.insert("key2".to_string(), JValue::Null);
+        assert_eq!(None, obj.remove(&k1));
+        obj.insert(k1.clone(), JValue::Boolean(true));
+        obj.insert(k2.clone(), JValue::Null);
         assert_eq!(2, obj.len());
-        assert_eq!(JValue::Boolean(true), obj.remove("key1").unwrap());
-        assert_eq!(JValue::Null, obj.remove("key2").unwrap());
+        assert_eq!(JValue::Boolean(true), obj.remove(&k1).unwrap());
+        assert_eq!(JValue::Null, obj.remove(&k2).unwrap());
         assert_eq!(0, obj.len());
     }
 
     #[test]
     fn test_get() {
         let mut obj = JObject::new();
-        obj.insert("key1".to_string(), JValue::Boolean(true));
-        assert_eq!(JValue::Boolean(true), *obj.get("key1").unwrap());
-        assert_eq!(None, obj.get("key2"));
+        let k1= JString::new("key1").unwrap();
+        let k2= JString::new("key2").unwrap();
+        obj.insert(k1.clone(), JValue::Boolean(true));
+        assert_eq!(JValue::Boolean(true), *obj.get(&k1).unwrap());
+        assert_eq!(None, obj.get(&k2));
     }
 
     #[test]
     fn test_get_mut() {
         let mut obj = JObject::new();
-        obj.insert("key1".to_string(), JValue::Boolean(true));
-        assert_eq!(JValue::Boolean(true), *obj.get("key1").unwrap());
-        assert_eq!(None, obj.get_mut("key2"));
-        *obj.get_mut("key1").unwrap() = JValue::Null;
-        assert_eq!(JValue::Null, *obj.get("key1").unwrap());
+        let k1= JString::new("key1").unwrap();
+        let k2= JString::new("key2").unwrap();
+        obj.insert(k1.clone(), JValue::Boolean(true));
+        assert_eq!(JValue::Boolean(true), *obj.get(&k1).unwrap());
+        assert_eq!(None, obj.get_mut(&k2));
+        *obj.get_mut(&k1).unwrap() = JValue::Null;
+        assert_eq!(JValue::Null, *obj.get(&k1).unwrap());
     }
 
     #[test]
@@ -233,27 +243,32 @@ mod test {
         let mut obj2 = JObject::new();
         let mut obj3 = JObject::new();
         let mut obj4 = JObject::new();
+        let k1= JString::new("key1").unwrap();
+        let k2= JString::new("key2").unwrap();
         assert_eq!(obj1, obj2);
-        obj1.insert("key1".to_string(), JValue::Boolean(true));
-        obj1.insert("key2".to_string(), JValue::Null);
+        obj1.insert(k1.clone(), JValue::Boolean(true));
+        obj1.insert(k2.clone(), JValue::Null);
         assert_ne!(obj1, obj2);
-        obj2.insert("key1".to_string(), JValue::Boolean(true));
-        obj2.insert("key2".to_string(), JValue::Null);
+        obj2.insert(k1.clone(), JValue::Boolean(true));
+        obj2.insert(k2.clone(), JValue::Null);
         assert_eq!(obj1, obj2);
-        obj3.insert("key2".to_string(), JValue::Null);
-        obj3.insert("key1".to_string(), JValue::Boolean(true));
+        obj3.insert(k2.clone(), JValue::Null);
+        obj3.insert(k1.clone(), JValue::Boolean(true));
         assert_eq!(obj1, obj3);
-        obj4.insert("key1".to_string(), JValue::Boolean(false));
-        obj4.insert("key2".to_string(), JValue::Null);
+        obj4.insert(k1.clone(), JValue::Boolean(false));
+        obj4.insert(k2.clone(), JValue::Null);
         assert_ne!(obj1, obj4);
     }
 
     #[test]
     fn test_serialization() {
         let mut obj = JObject::new();
+        let k1= JString::new("key1").unwrap();
+        let k2= JString::new("key2").unwrap();
         assert_eq!("{}".to_string(), obj.serialize());
-        obj.insert("key1".to_string(), JValue::Boolean(true));
-        obj.insert("key2".to_string(), JValue::Boolean(false));
+        obj.insert(k1.clone(), JValue::Boolean(true));
+        assert_eq!("{\"key1\":true}".to_string(), obj.serialize());
+        obj.insert(k2.clone(), JValue::Boolean(false));
         assert!("{\"key1\":true,\"key2\":false}".to_string() == obj.serialize()
             || "{\"key2\":false,\"key1\":true}".to_string() == obj.serialize());
     }

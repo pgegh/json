@@ -16,13 +16,14 @@
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::fmt::{Display, Formatter};
+use std::hash::{Hash, Hasher};
 use crate::data_structures::Serialize;
 
 /// A string is a sequence of Unicode code points wrapped with quotation marks (U+0022). All code
 /// points may be placed within the quotation marks except for the code points that must be
 /// escaped: quotation mark (U+0022), reverse solidus (U+005C), and the control characters
 /// U+0000 to U+001F. There are two-character escape sequence representations of some characters.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq)]
 pub struct JString {
     value: String,
 }
@@ -101,6 +102,12 @@ impl Serialize for JString {
 impl PartialEq for JString {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
+    }
+}
+
+impl Hash for JString {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.value.hash(state);
     }
 }
 
