@@ -125,7 +125,8 @@ mod test {
         let o2: JValue = JValue::Object(JObject::new());
         assert_eq!(o1, o2);
         let mut obj = JObject::new();
-        obj.insert("key1".to_string(), JValue::Null);
+        let k1 = JString::new("key1").unwrap();
+        obj.insert(k1, JValue::Null);
         let o3: JValue = JValue::Object(obj);
         assert_eq!("{key1 : null,}".to_string(), o3.to_string());
         assert_ne!(o1, o3);
@@ -198,8 +199,11 @@ mod test {
         assert_eq!("{}".to_string(), v.serialize());
 
         let mut obj = JObject::new();
-        obj.insert("key1".to_string(), JValue::Null);
-        obj.insert("key2".to_string(), JValue::Boolean(false));
+        let k1 = JString::new("key1").unwrap();
+        let k2 = JString::new("key2").unwrap();
+        obj.insert(k1, JValue::Null);
+        assert_eq!("{\"key1\":null}".to_string(), obj.serialize());
+        obj.insert(k2, JValue::Boolean(false));
         v = JValue::Object(obj);
         assert!("{\"key1\":null,\"key2\":false}".to_string() == v.serialize()
             || "{\"key2\":false,\"key1\":null}".to_string() == v.serialize());
