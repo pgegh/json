@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
-//! A library for parsing, serializing and creating json objects.
+//! Parsing functions to create a JSON data-structure
 
-/// Data-structures for different JSON components
-pub mod data_structures;
-mod parser;
+mod tokenizer;
