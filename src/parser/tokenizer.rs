@@ -20,7 +20,7 @@
 
 use std::str::Chars;
 
-fn tokenize_str(s: &str) -> Result<Vec<Token>, String> {
+pub fn tokenize(s: &str) -> Result<Vec<Token>, String> {
     let mut chars = s.chars();
     let mut tokens: Vec<Token> = Vec::new();
 
@@ -109,7 +109,7 @@ fn get_string(chars: &mut Chars) -> Token {
 
 
 #[derive(Debug)]
-enum Token {
+pub enum Token {
     String(String),
     Number(String),
     CurlyBracketOpen,
@@ -139,48 +139,48 @@ impl PartialEq for Token {
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::tokenizer::{Token, tokenize_str};
+    use crate::parser::tokenizer::{Token, tokenize};
 
     #[test]
     fn test_tokenize_str_curly() {
-        assert_eq!(vec![Token::CurlyBracketOpen], tokenize_str("{").unwrap());
-        assert_eq!(vec![Token::CurlyBracketClose], tokenize_str("}").unwrap());
-        assert_eq!(vec![Token::CurlyBracketOpen, Token::CurlyBracketClose], tokenize_str("{}").unwrap());
-        assert_eq!(vec![Token::CurlyBracketOpen, Token::CurlyBracketClose], tokenize_str(" \t{\n } ").unwrap());
+        assert_eq!(vec![Token::CurlyBracketOpen], tokenize("{").unwrap());
+        assert_eq!(vec![Token::CurlyBracketClose], tokenize("}").unwrap());
+        assert_eq!(vec![Token::CurlyBracketOpen, Token::CurlyBracketClose], tokenize("{}").unwrap());
+        assert_eq!(vec![Token::CurlyBracketOpen, Token::CurlyBracketClose], tokenize(" \t{\n } ").unwrap());
     }
 
     #[test]
     fn test_tokenize_str_square() {
-        assert_eq!(vec![Token::SquareBracketOpen], tokenize_str("[").unwrap());
-        assert_eq!(vec![Token::SquareBracketClose], tokenize_str("]").unwrap());
-        assert_eq!(vec![Token::SquareBracketOpen, Token::SquareBracketClose], tokenize_str("[]").unwrap());
-        assert_eq!(vec![Token::SquareBracketOpen, Token::SquareBracketClose], tokenize_str(" \t[\n ] ").unwrap());
+        assert_eq!(vec![Token::SquareBracketOpen], tokenize("[").unwrap());
+        assert_eq!(vec![Token::SquareBracketClose], tokenize("]").unwrap());
+        assert_eq!(vec![Token::SquareBracketOpen, Token::SquareBracketClose], tokenize("[]").unwrap());
+        assert_eq!(vec![Token::SquareBracketOpen, Token::SquareBracketClose], tokenize(" \t[\n ] ").unwrap());
     }
 
     #[test]
     fn test_tokenize_str_colon() {
-        assert_eq!(vec![Token::Colon], tokenize_str(":").unwrap());
-        assert_eq!(vec![Token::Colon], tokenize_str("\n \t \t:  \n").unwrap());
+        assert_eq!(vec![Token::Colon], tokenize(":").unwrap());
+        assert_eq!(vec![Token::Colon], tokenize("\n \t \t:  \n").unwrap());
     }
 
     #[test]
     fn test_tokenize_str_comma() {
-        assert_eq!(vec![Token::Comma], tokenize_str(",").unwrap());
-        assert_eq!(vec![Token::Comma], tokenize_str("\n \t \t,  \n").unwrap());
+        assert_eq!(vec![Token::Comma], tokenize(",").unwrap());
+        assert_eq!(vec![Token::Comma], tokenize("\n \t \t,  \n").unwrap());
     }
 
     #[test]
     fn test_tokenize_str_string() {
-        assert_eq!(vec![Token::String("hello world".to_string())], tokenize_str("\"hello world\"").unwrap());
-        assert_eq!(vec![Token::String("hello \\\" world".to_string())], tokenize_str("\"hello \\\" world\"").unwrap());
-        assert_eq!(vec![Token::String("hello world".to_string())], tokenize_str("\n \t \t\"hello world\"  \n").unwrap());
+        assert_eq!(vec![Token::String("hello world".to_string())], tokenize("\"hello world\"").unwrap());
+        assert_eq!(vec![Token::String("hello \\\" world".to_string())], tokenize("\"hello \\\" world\"").unwrap());
+        assert_eq!(vec![Token::String("hello world".to_string())], tokenize("\n \t \t\"hello world\"  \n").unwrap());
     }
 
     #[test]
     fn test_tokenize_str_number() {
-        assert_eq!(vec![Token::Number("0.013e10".to_string())], tokenize_str("0.013e10").unwrap());
-        assert_eq!(vec![Token::Number("00E.-0+13e10".to_string())], tokenize_str("00E.-0+13e10").unwrap());
-        assert_eq!(vec![Token::Number("0.013".to_string()), Token::Number("0e10".to_string())], tokenize_str("\n\t0.013 0e10").unwrap());
+        assert_eq!(vec![Token::Number("0.013e10".to_string())], tokenize("0.013e10").unwrap());
+        assert_eq!(vec![Token::Number("00E.-0+13e10".to_string())], tokenize("00E.-0+13e10").unwrap());
+        assert_eq!(vec![Token::Number("0.013".to_string()), Token::Number("0e10".to_string())], tokenize("\n\t0.013 0e10").unwrap());
     }
 
     #[test]
@@ -195,8 +195,8 @@ mod tests {
             Token::Number("10e20".to_string()),
             Token::SquareBracketClose,
             Token::CurlyBracketClose,
-        ], tokenize_str("{\n\t\"key\" : [10,10e20]\n}").unwrap());
-        assert_eq!(Err("Invalid char \'+\' (0x002b)".to_string()), tokenize_str("+10"));
-        assert_eq!(Err("Invalid char \'d\' (0x0064)".to_string()), tokenize_str("1d0"));
+        ], tokenize("{\n\t\"key\" : [10,10e20]\n}").unwrap());
+        assert_eq!(Err("Invalid char \'+\' (0x002b)".to_string()), tokenize("+10"));
+        assert_eq!(Err("Invalid char \'d\' (0x0064)".to_string()), tokenize("1d0"));
     }
 }
