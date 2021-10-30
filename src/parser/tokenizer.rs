@@ -18,6 +18,7 @@
 //! A lexical analyzer for JSON
 
 
+use std::fmt::{Display, Formatter};
 use std::str::Chars;
 
 pub fn tokenize(s: &str) -> Result<Vec<Token>, String> {
@@ -38,14 +39,11 @@ pub fn tokenize(s: &str) -> Result<Vec<Token>, String> {
                         || whitespace == 0x000A as char
                         || whitespace == 0x000D as char
                         || whitespace == 0x0009 as char => (),
-                    '"' => tokens.push(get_string(&mut chars)),
-                    '0'..='9' | '-' => {
-                        let mut result = match get_number(&mut chars, c) {
-                            Ok(t) => t,
-                            Err(s) => return Err(s)
-                        };
-                        tokens.append(&mut result);
-                    }
+                    '"' => tokens.push(get_string(&mut chars)?),
+                    '0'..='9' | '-' => tokens.append(&mut get_number(&mut chars, c)?),
+                    't' => tokens.push(get_true(&mut chars)?),
+                    'f' => tokens.push(get_false(&mut chars)?),
+                    'n' => tokens.push(get_null(&mut chars)?),
                     _ => return Err(format!("Invalid char \'{}\' ({:#06x})", c, c as usize))
                 }
             }
@@ -53,6 +51,61 @@ pub fn tokenize(s: &str) -> Result<Vec<Token>, String> {
         }
     }
     Ok(tokens)
+}
+
+fn get_true(chars: &mut Chars) -> Result<Token, String> {
+    let err = "Invalid token ";
+    match chars.next() {
+        Some('r') => match chars.next() {
+            Some('u') => match chars.next() {
+                Some('e') => Ok(Token::True),
+                Some(x) => return Err(format!("{}\"tru{}\"", err, x)),
+                None => return Err(format!("{}\"tru\"", err)),
+            },
+            Some(x) => return Err(format!("{}\"tr{}\"", err, x)),
+            None => return Err(format!("{}\"tr\"", err)),
+        },
+        Some(x) => return Err(format!("{}\"t{}\"", err, x)),
+        None => return Err(format!("{}\"t\"", err)),
+    }
+}
+
+fn get_false(chars: &mut Chars) -> Result<Token, String> {
+    let err = "Invalid token ";
+    match chars.next() {
+        Some('a') => match chars.next() {
+            Some('l') => match chars.next() {
+                Some('s') => match chars.next() {
+                    Some('e') => Ok(Token::False),
+                    Some(x) => return Err(format!("{}\"fals{}\"", err, x)),
+                    None => return Err(format!("{}\"fals\"", err)),
+                },
+                Some(x) => return Err(format!("{}\"fal{}\"", err, x)),
+                None => return Err(format!("{}\"fal\"", err)),
+            },
+            Some(x) => return Err(format!("{}\"fa{}\"", err, x)),
+            None => return Err(format!("{}\"fa\"", err)),
+        },
+        Some(x) => return Err(format!("{}\"f{}\"", err, x)),
+        None => return Err(format!("{}\"f\"", err)),
+    }
+}
+
+fn get_null(chars: &mut Chars) -> Result<Token, String> {
+    let err = "Invalid token ";
+    match chars.next() {
+        Some('u') => match chars.next() {
+            Some('l') => match chars.next() {
+                Some('l') => Ok(Token::Null),
+                Some(x) => return Err(format!("{}\"nul{}\"", err, x)),
+                None => return Err(format!("{}\"nul\"", err)),
+            },
+            Some(x) => return Err(format!("{}\"nu{}\"", err, x)),
+            None => return Err(format!("{}\"nu\"", err)),
+        },
+        Some(x) => return Err(format!("{}\"n{}\"", err, x)),
+        None => return Err(format!("{}\"n\"", err)),
+    }
 }
 
 fn get_number(chars: &mut Chars, first_char: char) -> Result<Vec<Token>, String> {
@@ -79,7 +132,7 @@ fn get_number(chars: &mut Chars, first_char: char) -> Result<Vec<Token>, String>
     Ok(vec![Token::Number(string)])
 }
 
-fn get_string(chars: &mut Chars) -> Token {
+fn get_string(chars: &mut Chars) -> Result<Token, String> {
     let mut string = String::new();
     let mut last_char = '"';
     loop {
@@ -100,11 +153,10 @@ fn get_string(chars: &mut Chars) -> Token {
                     }
                 }
             }
-            None => break
+            None => return Err(format!("Invalid string token at the end of file!"))
         }
     }
-
-    Token::String(string)
+    Ok(Token::String(string))
 }
 
 
@@ -118,6 +170,9 @@ pub enum Token {
     SquareBracketClose,
     Colon,
     Comma,
+    Null,
+    True,
+    False,
 }
 
 impl PartialEq for Token {
@@ -131,7 +186,28 @@ impl PartialEq for Token {
             (Token::SquareBracketClose, Token::SquareBracketClose) => true,
             (Token::Colon, Token::Colon) => true,
             (Token::Comma, Token::Comma) => true,
+            (Token::True, Token::True) => true,
+            (Token::False, Token::False) => true,
+            (Token::Null, Token::Null) => true,
             _ => false
+        }
+    }
+}
+
+impl Display for Token {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Token::String(s) => write!(f, "{}", s),
+            Token::Number(n) => write!(f, "{}", n),
+            Token::True => write!(f, "true"),
+            Token::False => write!(f, "false"),
+            Token::Null => write!(f, "null"),
+            Token::Comma => write!(f, ","),
+            Token::Colon => write!(f, ":"),
+            Token::SquareBracketOpen => write!(f, "["),
+            Token::SquareBracketClose => write!(f, "]"),
+            Token::CurlyBracketOpen => write!(f, "{{"),
+            Token::CurlyBracketClose => write!(f, "}}"),
         }
     }
 }
@@ -142,7 +218,7 @@ mod tests {
     use crate::parser::tokenizer::{Token, tokenize};
 
     #[test]
-    fn test_tokenize_str_curly() {
+    fn test_tokenize_curly() {
         assert_eq!(vec![Token::CurlyBracketOpen], tokenize("{").unwrap());
         assert_eq!(vec![Token::CurlyBracketClose], tokenize("}").unwrap());
         assert_eq!(vec![Token::CurlyBracketOpen, Token::CurlyBracketClose], tokenize("{}").unwrap());
@@ -150,7 +226,7 @@ mod tests {
     }
 
     #[test]
-    fn test_tokenize_str_square() {
+    fn test_tokenize_square() {
         assert_eq!(vec![Token::SquareBracketOpen], tokenize("[").unwrap());
         assert_eq!(vec![Token::SquareBracketClose], tokenize("]").unwrap());
         assert_eq!(vec![Token::SquareBracketOpen, Token::SquareBracketClose], tokenize("[]").unwrap());
@@ -158,45 +234,68 @@ mod tests {
     }
 
     #[test]
-    fn test_tokenize_str_colon() {
+    fn test_tokenize_colon() {
         assert_eq!(vec![Token::Colon], tokenize(":").unwrap());
         assert_eq!(vec![Token::Colon], tokenize("\n \t \t:  \n").unwrap());
     }
 
     #[test]
-    fn test_tokenize_str_comma() {
+    fn test_tokenize_comma() {
         assert_eq!(vec![Token::Comma], tokenize(",").unwrap());
         assert_eq!(vec![Token::Comma], tokenize("\n \t \t,  \n").unwrap());
     }
 
     #[test]
-    fn test_tokenize_str_string() {
+    fn test_tokenize_string() {
         assert_eq!(vec![Token::String("hello world".to_string())], tokenize("\"hello world\"").unwrap());
         assert_eq!(vec![Token::String("hello \\\" world".to_string())], tokenize("\"hello \\\" world\"").unwrap());
         assert_eq!(vec![Token::String("hello world".to_string())], tokenize("\n \t \t\"hello world\"  \n").unwrap());
+        assert_eq!(Err("Invalid string token at the end of file!".to_string()), tokenize("\"hello world"));
     }
 
     #[test]
-    fn test_tokenize_str_number() {
+    fn test_tokenize_number() {
         assert_eq!(vec![Token::Number("0.013e10".to_string())], tokenize("0.013e10").unwrap());
         assert_eq!(vec![Token::Number("00E.-0+13e10".to_string())], tokenize("00E.-0+13e10").unwrap());
         assert_eq!(vec![Token::Number("0.013".to_string()), Token::Number("0e10".to_string())], tokenize("\n\t0.013 0e10").unwrap());
     }
 
     #[test]
-    fn test_tokenize_str() {
+    fn test_tokenize_true() {
+        assert_eq!(vec![Token::True], tokenize("true").unwrap());
+        assert_eq!(vec![Token::True], tokenize("\n \t \ttrue  \n").unwrap());
+    }
+
+    #[test]
+    fn test_tokenize_false() {
+        assert_eq!(vec![Token::False], tokenize("false").unwrap());
+        assert_eq!(vec![Token::False], tokenize("\n \t \tfalse  \n").unwrap());
+    }
+
+    #[test]
+    fn test_tokenize_null() {
+        assert_eq!(vec![Token::Null], tokenize("null").unwrap());
+        assert_eq!(vec![Token::Null], tokenize("\n \t \tnull  \n").unwrap());
+    }
+
+    #[test]
+    fn test_tokenize() {
         assert_eq!(vec![
             Token::CurlyBracketOpen,
             Token::String("key".to_string()),
             Token::Colon,
             Token::SquareBracketOpen,
+            Token::True,
+            Token::Comma,
             Token::Number("10".to_string()),
             Token::Comma,
             Token::Number("10e20".to_string()),
             Token::SquareBracketClose,
             Token::CurlyBracketClose,
-        ], tokenize("{\n\t\"key\" : [10,10e20]\n}").unwrap());
+        ], tokenize("{\n\t\"key\" : [true, 10,10e20]\n}").unwrap());
         assert_eq!(Err("Invalid char \'+\' (0x002b)".to_string()), tokenize("+10"));
         assert_eq!(Err("Invalid char \'d\' (0x0064)".to_string()), tokenize("1d0"));
+        assert_eq!(Err("Invalid token \"tru \"".to_string()), tokenize("tru "));
+        assert_eq!(Err("Invalid token \"nul\"".to_string()), tokenize("nul"));
     }
 }
