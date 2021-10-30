@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
+//! Data-structures for different JSON components
+
 mod j_string;
 mod j_whitespace;
 mod j_number;
