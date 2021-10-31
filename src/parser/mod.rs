@@ -18,3 +18,6 @@
 //! Parsing functions to create a JSON data-structure
 
 mod tokenizer;
+mod parser;
+
+pub use parser::parse;

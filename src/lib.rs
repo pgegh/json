@@ -18,4 +18,4 @@
 //! A library for parsing, serializing and creating json objects.
 
 pub mod data_structures;
-mod parser;
+pub mod parser;
