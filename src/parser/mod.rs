@@ -19,3 +19,5 @@
 
 mod tokenizer;
 mod parser;
+
+pub use parser::parse;
