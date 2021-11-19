@@ -70,6 +70,13 @@ impl PartialEq for JValue {
 }
 
 impl Serialize for JValue {
+    /// Creates a serialization of the [`JValue`] data-structure as a JSON string with
+    /// minimal whitespace characters.
+    /// ```
+    /// # use json::data_structures::{JValue, Serialize};
+    /// let j_value : JValue = JValue::Array(vec![JValue::Boolean(true), JValue::Null]);
+    /// assert_eq!(j_value.serialize(), "[true,null]")
+    /// ```
     fn serialize(&self) -> String {
         let mut result = String::new();
         let s = match self {
