@@ -62,6 +62,13 @@ impl Display for JString {
 }
 
 impl Serialize for JString {
+    /// Creates a serialization of the [`JString`] data-structure as a JSON string with
+    /// minimal whitespace characters.
+    /// ```
+    /// # use json::data_structures::{JString, Serialize};
+    /// let j_string : JString = JString::new("\"Hello world!\"\n").unwrap();
+    /// assert_eq!(j_string.serialize(), "\"\\\"Hello world!\\\"\\n\"".to_string());
+    /// ```
     fn serialize(&self) -> String {
         let mut s = String::new();
         s.push('\"');

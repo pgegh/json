@@ -160,6 +160,16 @@ impl PartialEq for JObject {
 }
 
 impl Serialize for JObject {
+    /// Creates a serialization of [`JObject`] data-structure as a JSON string with
+    /// minimal whitespace characters.
+    /// ```
+    /// # use json::data_structures::{JObject, JString, JValue, Serialize};
+    /// let mut j_object : JObject = JObject::new();
+    /// let key : JString = JString::new("key").unwrap();
+    /// j_object.insert(key, JValue::Null);
+    ///
+    /// assert_eq!(j_object.serialize(), "{\"key\":null}")
+    /// ```
     fn serialize(&self) -> String {
         let mut result = String::new();
         result.push('{');

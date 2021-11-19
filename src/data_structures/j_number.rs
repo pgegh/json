@@ -180,6 +180,15 @@ impl PartialEq for JNumber {
 }
 
 impl Serialize for JNumber {
+    /// Creates a serialization of the [`JNumber`] data-structure as a JSON string with
+    /// minimal whitespace characters.
+    ///```
+    /// # use std::str::FromStr;
+    /// # use crate::json::data_structures::Serialize;
+    /// # use crate::json::data_structures::JNumber;
+    /// let j_number : JNumber = JNumber::from_str("1.23e-10").unwrap();
+    /// assert_eq!(j_number.serialize(), "1.23e-10".to_string())
+    ///```
     fn serialize(&self) -> String {
         self.to_string()
     }
@@ -323,5 +332,4 @@ mod test {
         n = JNumber::from_str("2.34E10").unwrap();
         assert_eq!("2.34E10".to_string(), n.serialize());
     }
-
 }
