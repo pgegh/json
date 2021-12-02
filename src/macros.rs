@@ -5,7 +5,6 @@
 /// ```
 /// # use json::data_structures::{JObject, JString, JValue};
 /// # use json::json;
-///
 /// let mut j_object = JObject::new();
 /// let key = JString::new("key").unwrap();
 /// let value = JValue::String(JString::new("value").unwrap());

@@ -61,9 +61,8 @@ impl FromStr for JNumber {
     /// Will create a Number form a string
     ///
     /// ```
-    /// use std::str::FromStr;
-    /// use json::data_structures::JNumber;
-    ///
+    /// # use std::str::FromStr;
+    /// # use json::data_structures::JNumber;
     /// let n = JNumber::from_str("-0.001").unwrap();
     /// assert_eq!("-0.001".to_string(), n.to_string());
     /// assert_eq!(-0.001_f64, n.get_f64_value());
