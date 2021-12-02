@@ -32,8 +32,7 @@ impl JString {
     /// Creates a new JSON string object.
     ///
     /// ```
-    /// use json::data_structures::JString;
-    ///
+    /// # use json::data_structures::JString;
     /// let s = JString::new("🚗 this is a car!").unwrap();
     /// assert_eq!("🚗 this is a car!".to_string(), s.to_string());
     ///

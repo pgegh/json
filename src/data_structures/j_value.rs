@@ -22,8 +22,7 @@ use crate::data_structures::{JString, JNumber, JObject, Serialize};
 /// object or an array.
 ///
 /// ```
-/// use json::data_structures::JValue;
-///
+/// # use json::data_structures::JValue;
 /// let b: JValue = JValue::Boolean(true);
 /// assert_eq!("true".to_string(), b.to_string());
 ///

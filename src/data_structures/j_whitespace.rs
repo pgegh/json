@@ -29,8 +29,7 @@ impl JWhitespace {
     /// Creates a new Ws struct that contains only 0x20, 0x0A, 0x0D, and 0x09 characters.
     ///
     /// ```
-    /// use json::data_structures::JWhitespace;
-    ///
+    /// # use json::data_structures::JWhitespace;
     /// let mut whitespace = String::new();
     /// whitespace.push(0x0020 as char);
     /// whitespace.push(0x000A as char);

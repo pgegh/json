@@ -32,8 +32,7 @@ impl JObject {
     /// Creates new empty JObject
     ///
     /// ```
-    /// use json::data_structures::JObject;
-    ///
+    /// # use json::data_structures::JObject;
     /// let object = JObject::new();
     /// assert_eq!("{}".to_string(), object.to_string());
     /// ```
@@ -47,8 +46,7 @@ impl JObject {
     /// Returns the number of elements in the JObject
     ///
     /// ```
-    /// use json::data_structures::{JObject, JString, JValue};
-    ///
+    /// # use json::data_structures::{JObject, JString, JValue};
     /// let mut obj = JObject::new();
     /// obj.insert(JString::new("key").unwrap(), JValue::Boolean(true));
     /// assert_eq!("{key : true,}".to_string(), obj.to_string());
@@ -65,8 +63,7 @@ impl JObject {
     /// value is returned.
     ///
     /// ```
-    /// use json::data_structures::{JObject, JString, JValue};
-    ///
+    /// # use json::data_structures::{JObject, JString, JValue};
     /// let mut obj = JObject::new();
     /// assert_eq!(0, obj.len());
     /// obj.insert(JString::new("key").unwrap(), JValue::Boolean(true));
@@ -87,8 +84,7 @@ impl JObject {
     /// was previously in the object. Otherwise will return [`None`].
     ///
     /// ```
-    /// use json::data_structures::{JObject, JString, JValue};
-    ///
+    /// # use json::data_structures::{JObject, JString, JValue};
     /// let mut obj = JObject::new();
     /// let s = JString::new("key").unwrap();
     /// obj.insert(s.clone(), JValue::Boolean(false));
@@ -111,8 +107,7 @@ impl JObject {
     /// Gets a reference to the value if the key exists in the object. Otherwise returns [`None`].
     ///
     /// ```
-    /// use json::data_structures::{JObject, JString, JValue};
-    ///
+    /// # use json::data_structures::{JObject, JString, JValue};
     /// let mut obj = JObject::new();
     /// let s = JString::new("key").unwrap();
     /// obj.insert(s.clone(), JValue::Boolean(false));
@@ -126,8 +121,7 @@ impl JObject {
     /// Otherwise returns [`None`].
     ///
     /// ```
-    /// use json::data_structures::{JObject, JString, JValue};
-    ///
+    /// # use json::data_structures::{JObject, JString, JValue};
     /// let mut obj = JObject::new();
     /// let s = JString::new("key").unwrap();
     /// obj.insert(s.clone(), JValue::Boolean(false));
