@@ -46,9 +46,9 @@ impl JObject {
     /// Returns the number of elements in the JObject
     ///
     /// ```
-    /// # use json::data_structures::{JObject, JString, JValue};
+    /// # use json::data_structures::{JObject, JValue};
     /// let mut obj = JObject::new();
-    /// obj.insert(JString::new("key").unwrap(), JValue::Boolean(true));
+    /// obj.insert("key".to_string(), JValue::Boolean(true));
     /// assert_eq!("{key : true,}".to_string(), obj.to_string());
     /// ```
     pub fn len(&self) -> usize {
@@ -63,10 +63,10 @@ impl JObject {
     /// value is returned.
     ///
     /// ```
-    /// # use json::data_structures::{JObject, JString, JValue};
+    /// # use json::data_structures::{JObject, JValue};
     /// let mut obj = JObject::new();
     /// assert_eq!(0, obj.len());
-    /// obj.insert(JString::new("key").unwrap(), JValue::Boolean(true));
+    /// obj.insert("key".to_string(), JValue::Boolean(true));
     /// assert_eq!("{key : true,}".to_string(), obj.to_string());
     /// assert_eq!(1, obj.len());
     /// ```
@@ -84,9 +84,9 @@ impl JObject {
     /// was previously in the object. Otherwise will return [`None`].
     ///
     /// ```
-    /// # use json::data_structures::{JObject, JString, JValue};
+    /// # use json::data_structures::{JObject, JValue};
     /// let mut obj = JObject::new();
-    /// let s = JString::new("key").unwrap();
+    /// let s = "key".to_string();
     /// obj.insert(s.clone(), JValue::Boolean(false));
     /// assert_eq!(1, obj.len());
     ///
@@ -107,9 +107,9 @@ impl JObject {
     /// Gets a reference to the value if the key exists in the object. Otherwise returns [`None`].
     ///
     /// ```
-    /// # use json::data_structures::{JObject, JString, JValue};
+    /// # use json::data_structures::{JObject, JValue};
     /// let mut obj = JObject::new();
-    /// let s = JString::new("key").unwrap();
+    /// let s = "key".to_string();
     /// obj.insert(s.clone(), JValue::Boolean(false));
     /// assert_eq!("false".to_string(), obj.get(&s).unwrap().to_string());
     /// ```
@@ -121,9 +121,9 @@ impl JObject {
     /// Otherwise returns [`None`].
     ///
     /// ```
-    /// # use json::data_structures::{JObject, JString, JValue};
+    /// # use json::data_structures::{JObject, JValue};
     /// let mut obj = JObject::new();
-    /// let s = JString::new("key").unwrap();
+    /// let s = "key".to_string();
     /// obj.insert(s.clone(), JValue::Boolean(false));
     /// *obj.get_mut(&s).unwrap() = JValue::Boolean(true);
     /// assert_eq!("true".to_string(), obj.get(&s).unwrap().to_string());
@@ -157,9 +157,9 @@ impl Serialize for JObject {
     /// Creates a serialization of [`JObject`] data-structure as a JSON string with
     /// minimal whitespace characters.
     /// ```
-    /// # use json::data_structures::{JObject, JString, JValue, Serialize};
+    /// # use json::data_structures::{JObject, JValue, Serialize};
     /// let mut j_object : JObject = JObject::new();
-    /// let key : JString = JString::new("key").unwrap();
+    /// let key  = "key".to_string();
     /// j_object.insert(key, JValue::Null);
     ///
     /// assert_eq!(j_object.serialize(), "{\"key\":null}")
