@@ -17,7 +17,7 @@
 
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
-use crate::data_structures::Serialize;
+use crate::serializer::Serialize;
 
 /// A number is a sequence of decimal digits with no superfluous leading zero. It may have a
 /// preceding minus sign (U+002D). It may have a fractional part prefixed by a decimal
@@ -183,7 +183,7 @@ impl Serialize for JNumber {
     /// minimal whitespace characters.
     ///```
     /// # use std::str::FromStr;
-    /// # use crate::json::data_structures::Serialize;
+    /// # use json::serializer::Serialize;
     /// # use crate::json::data_structures::JNumber;
     /// let j_number : JNumber = JNumber::from_str("1.23e-10").unwrap();
     /// assert_eq!(j_number.serialize(), "1.23e-10".to_string())
@@ -225,7 +225,8 @@ pub enum Sign {
 #[cfg(test)]
 mod test {
     use std::str::FromStr;
-    use crate::data_structures::{JNumber, Serialize};
+    use crate::data_structures::JNumber;
+    use crate::serializer::Serialize;
 
     #[test]
     fn test_zero() {

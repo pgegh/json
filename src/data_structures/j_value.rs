@@ -16,7 +16,8 @@
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::fmt::{Display, Formatter};
-use crate::data_structures::{JNumber, JObject, Serialize, serialize_string};
+use crate::data_structures::{JNumber, JObject};
+use crate::serializer::{Serialize, serialize_string};
 
 /// A value can be a string, or a number, or true or false or null, or an
 /// object or an array.
@@ -72,7 +73,8 @@ impl Serialize for JValue {
     /// Creates a serialization of the [`JValue`] data-structure as a JSON string with
     /// minimal whitespace characters.
     /// ```
-    /// # use json::data_structures::{JValue, Serialize};
+    /// # use json::data_structures::JValue;
+    /// # use json::serializer::Serialize;
     /// let j_value : JValue = JValue::Array(vec![JValue::Boolean(true), JValue::Null]);
     /// assert_eq!(j_value.serialize(), "[true,null]")
     /// ```
@@ -122,7 +124,8 @@ fn array_to_string(array: &Vec<JValue>, serialize: bool) -> String {
 #[cfg(test)]
 mod test {
     use std::str::FromStr;
-    use crate::data_structures::{JValue, JNumber, JObject, Serialize};
+    use crate::data_structures::{JValue, JNumber, JObject};
+    use crate::serializer::Serialize;
 
     #[test]
     fn test_valid_object() {

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::data_structures::Serialize;
+use crate::serializer::Serialize;
 
 /// A data-structure that represents whitespace. Whitespace is any sequence of one or more of
 /// the following code points: character tabulation (U+0009), line feed (U+000A), carriage return
@@ -80,7 +80,8 @@ impl Serialize for JWhitespace {
 
 #[cfg(test)]
 mod tests {
-    use crate::data_structures::{JWhitespace, Serialize};
+    use crate::data_structures::JWhitespace;
+    use crate::serializer::Serialize;
 
     #[test]
     fn test_empty_string() {
