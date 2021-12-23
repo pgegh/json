@@ -19,6 +19,7 @@
 
 pub mod data_structures;
 pub mod parser;
+pub mod serializer;
 
 #[macro_use]
 mod macros;

@@ -17,7 +17,8 @@
 
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
-use crate::data_structures::{JValue, Serialize, serialize_string};
+use crate::data_structures::JValue;
+use crate::serializer::{Serialize, serialize_string};
 
 /// An object is an unordered set of name/value pairs.
 /// An object begins with '{' left brace and ends with '}' right brace.
@@ -157,7 +158,8 @@ impl Serialize for JObject {
     /// Creates a serialization of [`JObject`] data-structure as a JSON string with
     /// minimal whitespace characters.
     /// ```
-    /// # use json::data_structures::{JObject, JValue, Serialize};
+    /// # use json::data_structures::{JObject, JValue};
+    /// # use json::serializer::Serialize;
     /// let mut j_object : JObject = JObject::new();
     /// let key  = "key".to_string();
     /// j_object.insert(key, JValue::Null);
@@ -183,7 +185,8 @@ impl Serialize for JObject {
 
 #[cfg(test)]
 mod test {
-    use crate::data_structures::{JObject, JValue, Serialize};
+    use crate::data_structures::{JObject, JValue};
+    use crate::serializer::Serialize;
 
     #[test]
     fn test_empty_object() {
