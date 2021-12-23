@@ -3,11 +3,11 @@
 /// Improvement: use tokens instead of &str.
 ///
 /// ```
-/// # use json::data_structures::{JObject, JString, JValue};
+/// # use json::data_structures::{JObject, JValue};
 /// # use json::json;
 /// let mut j_object = JObject::new();
-/// let key = JString::new("key").unwrap();
-/// let value = JValue::String(JString::new("value").unwrap());
+/// let key = "key".to_string();
+/// let value = JValue::String("value".to_string());
 /// j_object.insert(key, value);
 ///
 /// let j0 = JValue::Object(j_object);

@@ -16,7 +16,7 @@
 // along with json.  If not, see <https://www.gnu.org/licenses/>.
 
 use std::fmt::{Display, Formatter};
-use crate::data_structures::{JString, JNumber, JObject, Serialize};
+use crate::data_structures::{JNumber, JObject, Serialize, serialize_string};
 
 /// A value can be a string, or a number, or true or false or null, or an
 /// object or an array.
@@ -35,7 +35,7 @@ use crate::data_structures::{JString, JNumber, JObject, Serialize};
 pub enum JValue {
     Object(JObject),
     Array(Vec<JValue>),
-    String(JString),
+    String(String),
     Number(JNumber),
     Boolean(bool),
     Null,
@@ -81,7 +81,7 @@ impl Serialize for JValue {
         let s = match self {
             JValue::Object(o) => o.serialize(),
             JValue::Array(a) => array_to_string(a, true),
-            JValue::String(s) => s.serialize(),
+            JValue::String(s) => serialize_string(s),
             JValue::Number(n) => n.serialize(),
             JValue::Boolean(b) => format!("{}", b),
             JValue::Null => "null".to_string()
@@ -122,7 +122,7 @@ fn array_to_string(array: &Vec<JValue>, serialize: bool) -> String {
 #[cfg(test)]
 mod test {
     use std::str::FromStr;
-    use crate::data_structures::{JString, JValue, JNumber, JObject, Serialize};
+    use crate::data_structures::{JValue, JNumber, JObject, Serialize};
 
     #[test]
     fn test_valid_object() {
@@ -131,7 +131,7 @@ mod test {
         let o2: JValue = JValue::Object(JObject::new());
         assert_eq!(o1, o2);
         let mut obj = JObject::new();
-        let k1 = JString::new("key1").unwrap();
+        let k1 = "key1".to_string();
         obj.insert(k1, JValue::Null);
         let o3: JValue = JValue::Object(obj);
         assert_eq!("{key1 : null,}".to_string(), o3.to_string());
@@ -141,7 +141,7 @@ mod test {
     #[test]
     fn test_valid_array() {
         let a1: JValue = JValue::Array(vec![JValue::Boolean(true),
-                                            JValue::String(JString::new("123").unwrap()),
+                                            JValue::String("123".to_string()),
                                             JValue::Number(JNumber::from_str("3.4e-3").unwrap())]);
         assert_eq!("[true, \"123\", 3.4e-3]".to_string(), a1.to_string());
         let a2: JValue = JValue::Array(vec![JValue::Boolean(true)]);
@@ -150,9 +150,9 @@ mod test {
 
     #[test]
     fn test_valid_j_string() {
-        let s1: JValue = JValue::String(JString::new("Hello World!").unwrap());
+        let s1: JValue = JValue::String("Hello World!".to_string());
         assert_eq!("Hello World!".to_string(), s1.to_string());
-        let s2: JValue = JValue::String(JString::new("Hello World!").unwrap());
+        let s2: JValue = JValue::String("Hello World!".to_string());
         assert_eq!(s1, s2);
     }
 
@@ -205,8 +205,8 @@ mod test {
         assert_eq!("{}".to_string(), v.serialize());
 
         let mut obj = JObject::new();
-        let k1 = JString::new("key1").unwrap();
-        let k2 = JString::new("key2").unwrap();
+        let k1 = "key1".to_string();
+        let k2 = "key2".to_string();
         obj.insert(k1, JValue::Null);
         assert_eq!("{\"key1\":null}".to_string(), obj.serialize());
         obj.insert(k2, JValue::Boolean(false));
@@ -217,7 +217,7 @@ mod test {
         v = JValue::Number(JNumber::from_str("355.3").unwrap());
         assert_eq!("355.3".to_string(), v.serialize());
 
-        v = JValue::String(JString::new("hello").unwrap());
+        v = JValue::String("hello".to_string());
         assert_eq!("\"hello\"".to_string(), v.serialize());
     }
 }

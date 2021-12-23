@@ -17,7 +17,7 @@
 
 use std::slice::Iter;
 use std::str::FromStr;
-use crate::data_structures::{JNumber, JObject, JString, JValue};
+use crate::data_structures::{JNumber, JObject, JValue};
 use crate::parser::tokenizer::{tokenize, Token};
 
 
@@ -33,7 +33,7 @@ fn get_jvalue(tokens_itr: &mut Iter<Token>) -> Result<JValue, String> {
         Some(Token::CurlyBracketOpen) => get_jobject(tokens_itr),
         Some(Token::SquareBracketOpen) => get_jarray(tokens_itr),
         Some(Token::Number(n)) => Ok(JValue::Number(JNumber::from_str(n)?)),
-        Some(Token::String(s)) => Ok(JValue::String(JString::new(s)?)),
+        Some(Token::String(s)) => Ok(JValue::String(s.clone())),
         Some(Token::True) => Ok(JValue::Boolean(true)),
         Some(Token::False) => Ok(JValue::Boolean(false)),
         Some(Token::Null) => Ok(JValue::Null),
@@ -48,7 +48,7 @@ fn get_jarray(tokens_itr: &mut Iter<Token>) -> Result<JValue, String> {
         match tokens_itr.next() {
             Some(Token::CurlyBracketOpen) => vec.push(get_jobject(tokens_itr)?),
             Some(Token::SquareBracketOpen) => vec.push(get_jarray(tokens_itr)?),
-            Some(Token::String(s)) => vec.push(JValue::String(JString::new(s)?)),
+            Some(Token::String(s)) => vec.push(JValue::String(s.clone())),
             Some(Token::Number(n)) => vec.push(JValue::Number(JNumber::from_str(n)?)),
             Some(Token::True) => vec.push(JValue::Boolean(true)),
             Some(Token::False) => vec.push(JValue::Boolean(false)),
@@ -70,7 +70,7 @@ fn get_jobject(tokens_itr: &mut Iter<Token>) -> Result<JValue, String> {
     let mut obj = JObject::new();
     loop {
         let key = match tokens_itr.next() {
-            Some(Token::String(s)) => JString::new(s)?,
+            Some(Token::String(s)) => s.clone(),
             Some(Token::CurlyBracketClose) => return Ok(JValue::Object(obj)),
             Some(t) => return Err(format!("Invalid JSON object! Invalid token:  {}", t)),
             None => return
